@@ -347,14 +347,15 @@ scheduler(void)
         if(ptemp->state != RUNNABLE ||  ptemp->prior_val >= pmost->prior_val )
         continue;
         pmost = ptemp;
-  
       }
 
-      /* for(ptemp = ptable.proc; ptemp < &ptable.proc[NPROC]; ptemp++){
-        if(ptemp->state != RUNNABLE || ptemp->prior_val >= pmost->prior_val )
+      //increment priority for waiting functions
+      for(ptemp = ptable.proc; ptemp < &ptable.proc[NPROC]; ptemp++){
+        if(ptemp->state != RUNNABLE  && ptemp->state != SLEEPING ||  ptemp == pmost )
         continue;
-        pmost = ptemp;
-      } */
+        if(ptemp->state == RUNNABLE && ptemp->prior_val > 0)
+          ptemp->prior_val --;
+      }
 
       // Switch to chosen process.  It is the process's job
       // to release ptable.lock and then reacquire it
@@ -365,6 +366,11 @@ scheduler(void)
 
       swtch(&(c->scheduler), pmost->context);
       switchkvm();
+
+      //when a process runs decrease the priority
+      if (pmost->prior_val < 31) {
+          pmost->prior_val++;
+      }
 
       // Process is done running for now.
       // It should have changed its p->state before coming back.
