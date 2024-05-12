@@ -351,7 +351,7 @@ scheduler(void)
 
       //increment priority for waiting functions
       for(ptemp = ptable.proc; ptemp < &ptable.proc[NPROC]; ptemp++){
-        if(ptemp->state != RUNNABLE  && ptemp->state != SLEEPING ||  ptemp == pmost )
+        if((ptemp->state != RUNNABLE && ptemp->state != SLEEPING) || ptemp == pmost)
         continue;
         if(ptemp->state == RUNNABLE && ptemp->prior_val > 0)
           ptemp->prior_val --;
