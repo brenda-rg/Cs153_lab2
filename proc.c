@@ -279,11 +279,14 @@ exit(void)
 
   curproc->T_finish = ticks; //get end time of process
   int turnaround_time = curproc->T_finish - curproc->T_start; //calculate turnaround time before exiting
+  int waiting_time = turnaround_time - curproc->T_burst;
 
   //debug
   cprintf("Starting time: %d\n", curproc->T_start);
   cprintf("Exiting time:  %d\n", curproc->T_finish);
+  cprintf("Burst time: %d\n", curproc->T_burst);
   cprintf("Turnaround time:  %d\n", turnaround_time);
+  cprintf("waiting time: %d\n", waiting_time);
 
   if(curproc == initproc)
     panic("init exiting");
@@ -399,6 +402,7 @@ scheduler(void)
         if(ptemp->state != RUNNABLE ||  ptemp->prior_val >= pmost->prior_val )
         continue;
         pmost = ptemp;
+        pmost->T_burst ++;
       }
 
       //increment priority for waiting functions
