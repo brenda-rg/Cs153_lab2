@@ -99,6 +99,7 @@ exec(char *path, char **argv)
   curproc->sz = sz;
   curproc->tf->eip = elf.entry;  // main
   curproc->tf->esp = sp;
+  curproc->T_start = ticks; //start time of the process
   switchuvm(curproc);
   freevm(oldpgdir);
   return 0;
