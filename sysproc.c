@@ -89,3 +89,19 @@ sys_uptime(void)
   release(&tickslock);
   return xticks;
 }
+
+int
+sys_setpriority(void)
+{
+    int prior_lvl;
+    if(argint(0, &prior_lvl) < 0)
+        return -1;  // Error in getting the argument
+
+    struct proc *curproc = myproc();
+    if(prior_lvl < 0 || prior_lvl > 31)
+        return -1;  // Check for valid priority range
+
+    curproc->prior_val = prior_lvl;  // Set the new priority
+    yield();  // Yield to the scheduler immediately
+    return 0;  // Return success
+}
