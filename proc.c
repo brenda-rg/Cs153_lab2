@@ -209,6 +209,9 @@ fork(void)
       np->ofile[i] = filedup(curproc->ofile[i]);
   np->cwd = idup(curproc->cwd);
 
+  // Inherit the prior_val from the parent process.
+  np->prior_val = curproc->prior_val; 
+
   safestrcpy(np->name, curproc->name, sizeof(curproc->name));
 
   pid = np->pid;
