@@ -112,6 +112,7 @@ found:
   memset(p->context, 0, sizeof *p->context);
   p->context->eip = (uint)forkret;
 
+  p->prior_val = 10;  // Initialize the priority value to 10
   return p;
 }
 
