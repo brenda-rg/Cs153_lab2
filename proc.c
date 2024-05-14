@@ -545,3 +545,10 @@ procdump(void)
     cprintf("\n");
   }
 }
+
+//added; set the priority for the current process then call schedueler
+void setpriority(int prior_lvl) {
+  struct proc *curproc = myproc();
+  curproc->prior_val = prior_lvl;
+  yield();
+}
