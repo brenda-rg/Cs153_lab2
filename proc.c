@@ -333,24 +333,24 @@ void scheduler(void)
     struct proc *p;
     struct cpu *c = mycpu();
     c->proc = 0;
-    int lowest_priority;  // This variable will hold the lowest number found for priority (highest actual priority)
+    int lowest_prior_val;  // This variable will hold the smallest prior_val, representing the highest priority
 
     for (;;) {
         sti();  // Enable interrupts on this processor.
 
         acquire(&ptable.lock);  // Acquire the lock on the process table.
-        lowest_priority = 1000;  // Initialize to a high value; any actual priority should be lower.
+        lowest_prior_val = 1000;  // Initialize to a high value, no actual priority should be higher.
 
-        // First pass to find the runnable process with the highest priority (lowest number)
+        // First pass to find the runnable process with the highest priority (lowest prior_val)
         for (p = ptable.proc; p < &ptable.proc[NPROC]; p++) {
-            if (p->state == RUNNABLE && p->priority < lowest_priority) {
-                lowest_priority = p->priority;
+            if (p->state == RUNNABLE && p->prior_val < lowest_prior_val) {
+                lowest_prior_val = p->prior_val;
             }
         }
 
         // Second pass to run the highest priority process found in the first pass
         for (p = ptable.proc; p < &ptable.proc[NPROC]; p++) {
-            if (p->state != RUNNABLE || p->priority != lowest_priority)
+            if (p->state != RUNNABLE || p->prior_val != lowest_prior_val)
                 continue;  // Skip if not runnable or not the highest priority process
 
             // Switch to chosen process. It is the process's job
@@ -359,8 +359,8 @@ void scheduler(void)
             c->proc = p;
             switchuvm(p);
             p->state = RUNNING;
-            p->priority++;  // Increase the priority (lower its execution preference) since it's getting CPU time
 
+            // Consider priority adjustment logic here if necessary
             swtch(&(c->scheduler), p->context);
             switchkvm();
 
