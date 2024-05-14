@@ -51,6 +51,9 @@ struct proc {
   char name[16];               // Process name (debugging)
 
   int prior_val;  // Priority value, range: 0 (highest) to 31 (lowest)
+  uint t_start;     // Start tick count
+  uint t_finish;    // Finish tick count
+  uint burst_time;  // Total time process was running
 };
 
 // Process memory is laid out contiguously, low addresses first:
