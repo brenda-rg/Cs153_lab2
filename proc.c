@@ -113,6 +113,9 @@ found:
   p->context->eip = (uint)forkret;
 
   p->prior_val = 10;  // Initialize the priority value to 10
+  p->t_start = ticks;  // capture the start time
+  p->burst_time = 0;
+
   return p;
 }
 
@@ -273,13 +276,12 @@ exit(void)
 
 // Wait for a child process to exit and return its pid.
 // Return -1 if this process has no children.
-int
-wait(void)
+int wait(void)
 {
   struct proc *p;
   int havekids, pid;
   struct proc *curproc = myproc();
-  
+
   acquire(&ptable.lock);
   for(;;){
     // Scan through table looking for exited children.
@@ -297,21 +299,24 @@ wait(void)
         p->pid = 0;
         p->parent = 0;
         p->name[0] = 0;
-        p->killed = 0;
         p->state = UNUSED;
+        p->prior_val = p->original_prior_val; // Restore original priority if changed
         release(&ptable.lock);
         return pid;
       }
+      // Check priority donation condition
+      if (p->prior_val > curproc->prior_val) {
+        p->original_prior_val = p->prior_val; // Save original priority
+        p->prior_val = curproc->prior_val; // Donate priority
+      }
     }
-
-    // No point waiting if we don't have any children.
+    // No point waiting if no children
     if(!havekids || curproc->killed){
       release(&ptable.lock);
       return -1;
     }
-
-    // Wait for children to exit.  (See wakeup1 call in proc_exit.)
-    sleep(curproc, &ptable.lock);  //DOC: wait-sleep
+    // Wait for children to exit. (Continue looking)
+    sleep(curproc, &ptable.lock);  // DOC: wait-sleep
   }
 }
 
