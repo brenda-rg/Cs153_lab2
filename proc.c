@@ -248,16 +248,16 @@ exit(void)
   iput(curproc->cwd);
   end_op();
   curproc->cwd = 0;
-  curproc->T_finish = ticks; //get end time of process
+  /* curproc->T_finish = ticks; //get end time of process
   int turnaround_time = curproc->T_finish - curproc->T_start; //calculate turnaround time of process
-  int waiting_time = turnaround_time - curproc->T_burst; // waiting time of process
+  int waiting_time = turnaround_time - curproc->T_burst; // waiting time of process */
 
   //debug & print statements
   //cprintf("Starting time: %d\n", curproc->T_start);
   //cprintf("Exiting time:  %d\n", curproc->T_finish);
   //cprintf("Burst time: %d\n", curproc->T_burst);
-  cprintf("Turnaround time:  %d\n", turnaround_time);
-  cprintf("waiting time: %d\n", waiting_time);
+  /* cprintf("Turnaround time:  %d\n", turnaround_time);
+  cprintf("waiting time: %d\n", waiting_time); */
   //cprintf("priority value: %d\n", curproc->prior_val);
 
   acquire(&ptable.lock);
@@ -287,7 +287,7 @@ wait(void)
 {
   struct proc *p;
   int havekids, pid;
-  //int ptemp;
+  int temp;
   struct proc *curproc = myproc();
   
   acquire(&ptable.lock);
@@ -299,8 +299,8 @@ wait(void)
         continue;
       havekids = 1;
 
-      /* //priority donation
-      if((p->prior_val > curproc->prior_val) && p->state == RUNNABLE) {//priority donation
+      //priority donation
+      /* if((p->prior_val > curproc->prior_val) && p->state == RUNNABLE) {//priority donation
       ptemp = p->prior_val;
       //cprintf("Parent waiting on child %d with priority of %d:\n", p->pid, p->prior_val);
       p->prior_val = p->parent->prior_val;
@@ -308,6 +308,13 @@ wait(void)
       //cprintf("Parent has donated child %d with priority of %d:\n", p->pid, p->prior_val);
       //cprintf("Parent now has priority of %d:\n", p->parent->prior_val);
       } */
+
+      // Check priority donation condition and swap if necessary
+      if (p->prior_val > curproc->prior_val) {
+        temp = p->prior_val;
+        p->prior_val = curproc->prior_val;
+        curproc->prior_val = temp; // Swap priorities between parent and child
+      }
 
       if(p->state == ZOMBIE){
         // Found one.
@@ -320,6 +327,7 @@ wait(void)
         p->name[0] = 0;
         p->killed = 0;
         p->state = UNUSED;
+        p->prior_val = p->original_prior_val; // Ensure the child's priority is restored to original before clean-up
         release(&ptable.lock);
         return pid;
       }
@@ -327,6 +335,7 @@ wait(void)
 
     // No point waiting if we don't have any children.
     if(!havekids || curproc->killed){
+      curproc->prior_val = curproc->original_prior_val; // Restore the parent's original priority
       release(&ptable.lock);
       return -1;
     }
@@ -373,14 +382,14 @@ scheduler(void)
       }
       p = pmost;
       //increase priority for waiting functions 
-      for(ptemp = ptable.proc; ptemp < &ptable.proc[NPROC]; ptemp++){
+      /* for(ptemp = ptable.proc; ptemp < &ptable.proc[NPROC]; ptemp++){
         if(ptemp->state != RUNNABLE || ptemp == p)
         continue;
         if(ptemp->prior_val > 0) {
           (ptemp->prior_val)--;
           //cprintf("current priority of child %d: %d\n", ptemp->pid, ptemp->prior_val);
         } 
-      }
+      } */
 
       // Switch to chosen process.  It is the process's job
       // to release ptable.lock and then reacquire it
@@ -388,15 +397,15 @@ scheduler(void)
       c->proc = p;
       switchuvm(p);
       p->state = RUNNING;
-      p->T_burst ++;
+      //p->T_burst ++;
       swtch(&(c->scheduler), p->context);
       //p->T_burst ++;
       switchkvm();
       //p->T_burst ++;
       //when a process runs decrease the priority
-      if (p->prior_val < 31) {  //aging
+      /* if (p->prior_val < 31) {  //aging
         p->prior_val++;
-      }
+      } */
       // Process is done running for now.
       // It should have changed its p->state before coming back.
       c->proc = 0;
