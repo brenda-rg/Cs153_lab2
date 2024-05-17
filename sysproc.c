@@ -48,6 +48,22 @@ sys_getpriority(void)
   return myproc()->prior_val;
 }
 
+/* int
+sys_getburst(void) {
+  return myproc()->T_burst;
+} */
+
+/* int
+sys_getwaiting(void) {
+  return (myproc()->T_finish - myproc()->T_start)- myproc()->T_burst;
+}
+
+int
+sys_getturnaround(void) {
+  return (myproc()->T_finish - myproc()->T_start);
+} */
+
+
 int
 sys_sbrk(void)
 {

@@ -90,9 +90,15 @@ int PScheduler2(void){
             printf(1, " - Hello! this is child# %d and I will change my priority to %d \n", getpid(), 30 - 10 * i);
             setpriority(30 - 10 * i);
             for (j = 0; j < 50000; j++) {
+                /* if(j%2000 == 0) {
+                    printf(1, " - Child #%d with priority %d running \n", getpid(), getpriority());	
+                } */
                 asm("nop");
                 for(k = 0; k < 10000; k++) {
                     asm("nop"); 
+                }
+                if(j%5000 == 0) {
+                    printf(1, " - Child #%d with priority %d running \n", getpid(), getpriority());	
                 }
             }
             printf(1, " - Child #%d with ending priority %d has finished! \n", getpid(), getpriority());		
