@@ -281,7 +281,7 @@ int wait(void)
   struct proc *p;
   int havekids, pid;
   struct proc *curproc = myproc();
-  int original_priority = curproc->prior_val;  // Save the original priority of the parent
+  int temp;  // Temporary variable for swapping priorities
 
   acquire(&ptable.lock);
   for(;;){
@@ -291,6 +291,12 @@ int wait(void)
       if(p->parent != curproc)
         continue;
       havekids = 1;
+      // Check priority donation condition and swap if necessary
+      if (p->prior_val > curproc->prior_val) {
+        temp = p->prior_val;
+        p->prior_val = curproc->prior_val;
+        curproc->prior_val = temp; // Swap priorities between parent and child
+      }
       if(p->state == ZOMBIE){
         // Found one.
         pid = p->pid;
@@ -301,18 +307,14 @@ int wait(void)
         p->parent = 0;
         p->name[0] = 0;
         p->state = UNUSED;
-        p->prior_val = p->original_prior_val; // Restore original priority if changed
+        p->prior_val = p->original_prior_val; // Ensure the child's priority is restored to original before clean-up
         release(&ptable.lock);
         return pid;
-      }
-      // Check priority donation condition
-      if (p->prior_val > curproc->prior_val) {
-        curproc->prior_val = p->prior_val; // Donate priority
       }
     }
     // No point waiting if no children
     if(!havekids || curproc->killed){
-      curproc->prior_val = original_priority; // Restore the parent's original priority
+      curproc->prior_val = curproc->original_prior_val; // Restore the parent's original priority
       release(&ptable.lock);
       return -1;
     }
