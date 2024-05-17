@@ -366,11 +366,12 @@ scheduler(void)
       pmost = p;
       //find process with highest priority (closest to 0)
       for(ptemp = ptable.proc; ptemp < &ptable.proc[NPROC]; ptemp++){
-        if(ptemp->state != RUNNABLE || ptemp->prior_val >= pmost->prior_val)
+        if(ptemp->state != RUNNABLE)
         continue;
+        if (ptemp->prior_val < pmost->prior_val)
         pmost = ptemp;
       }
-
+      p = pmost;
       //increment priority for waiting functions
       /* for(ptemp = ptable.proc; ptemp < &ptable.proc[NPROC]; ptemp++){
         if(ptemp->state != RUNNABLE || ptemp == pmost)
@@ -382,14 +383,15 @@ scheduler(void)
       // Switch to chosen process.  It is the process's job
       // to release ptable.lock and then reacquire it
       // before jumping back to us.
-      c->proc = pmost;
-      switchuvm(pmost);
+      c->proc = p;
+      switchuvm(p);
       //pmost->T_burst ++;
-      pmost->state = RUNNING;
-      swtch(&(c->scheduler), pmost->context);
+      p->state = RUNNING;
+      swtch(&(c->scheduler), p->context);
       switchkvm();
+
       //when a process runs decrease the priority
-      /* if (pmost->prior_val < 31) {
+      /* if (pmost->prior_val < 31) {  //aging
         pmost->prior_val++;
       } */
       // Process is done running for now.
