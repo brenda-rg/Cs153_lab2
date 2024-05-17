@@ -380,16 +380,6 @@ scheduler(void)
           ptemp->prior_val --;
       } */
 
-      /* for(ptemp = ptable.proc; ptemp < &ptable.proc[NPROC]; ptemp++){
-        if(ptemp->state != RUNNABLE)
-        continue;
-        if(ptemp->prior_val < pmost->prior_val) {
-        pmost = ptemp;
-        }
-        if(ptemp->prior_val > 0) {
-          ptemp->prior_val--;
-          }
-        } */
       // Switch to chosen process.  It is the process's job
       // to release ptable.lock and then reacquire it
       // before jumping back to us.
