@@ -1,0 +1,3 @@
+#include "types.h"
+#include "user.h"
+int PScheduler(void);int main(int argc, char *argv[]){ PScheduler(); exit();} int PScheduler(void){ int pid; int i,j,k; setpriority(0); for (i = 0; i < 3; i++) {	pid = fork();	if (pid > 0) { continue; } else if ( pid == 0) { setpriority(30 - 10 * i); for (j = 0; j < 50000; j++) { asm("nop"); for(k = 0; k < 10000; k++) { asm("nop"); } } printf(1, "p i:%d t:%d\n", getpid(), uptime()); exit(); } else { printf(2," \n Error fork() \n"); exit(); } } if(pid > 0) { for (i = 0; i < 3; i++) { wait(); } } return 0;}
