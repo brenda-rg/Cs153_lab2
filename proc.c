@@ -248,16 +248,16 @@ exit(void)
   iput(curproc->cwd);
   end_op();
   curproc->cwd = 0;
-  /* curproc->T_finish = ticks; //get end time of process
+  curproc->T_finish = ticks; //get end time of process
   int turnaround_time = curproc->T_finish - curproc->T_start; //calculate turnaround time of process
-  int waiting_time = turnaround_time - curproc->T_burst; // waiting time of process */
+  int waiting_time = turnaround_time - curproc->T_burst; // waiting time of process
 
   //debug & print statements
   //cprintf("Starting time: %d\n", curproc->T_start);
   //cprintf("Exiting time:  %d\n", curproc->T_finish);
   //cprintf("Burst time: %d\n", curproc->T_burst);
-  /* cprintf("Turnaround time:  %d\n", turnaround_time);
-  cprintf("waiting time: %d\n", waiting_time); */
+  cprintf("Turnaround time:  %d\n", turnaround_time);
+  cprintf("waiting time: %d\n", waiting_time);
   //cprintf("priority value: %d\n", curproc->prior_val);
 
   acquire(&ptable.lock);
@@ -379,7 +379,7 @@ scheduler(void)
         if(ptemp->prior_val > 0) {
           (ptemp->prior_val)--;
           //cprintf("current priority of child %d: %d\n", ptemp->pid, ptemp->prior_val);
-        }
+        } 
       }
 
       // Switch to chosen process.  It is the process's job
@@ -387,7 +387,7 @@ scheduler(void)
       // before jumping back to us.
       c->proc = p;
       switchuvm(p);
-      //p->T_burst ++;
+      p->T_burst ++;
       p->state = RUNNING;
       swtch(&(c->scheduler), p->context);
       switchkvm();
