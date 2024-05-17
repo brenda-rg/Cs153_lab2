@@ -370,6 +370,7 @@ scheduler(void)
         continue;
         pmost = ptemp;
       }
+      p = pmost;
 
       //increment priority for waiting functions
       /* for(ptemp = ptable.proc; ptemp < &ptable.proc[NPROC]; ptemp++){
@@ -382,11 +383,11 @@ scheduler(void)
       // Switch to chosen process.  It is the process's job
       // to release ptable.lock and then reacquire it
       // before jumping back to us.
-      c->proc = pmost;
-      switchuvm(pmost);
+      c->proc = p;
+      switchuvm(p);
       //pmost->T_burst ++;
       pmost->state = RUNNING;
-      swtch(&(c->scheduler), pmost->context);
+      swtch(&(c->scheduler), p->context);
       switchkvm();
       //when a process runs decrease the priority
       /* if (pmost->prior_val < 31) {
