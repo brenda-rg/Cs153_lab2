@@ -366,21 +366,21 @@ scheduler(void)
       
       pmost = p;
       //find process with highest priority (closest to 0)
-      /* for(ptemp = ptable.proc; ptemp < &ptable.proc[NPROC]; ptemp++){
+      for(ptemp = ptable.proc; ptemp < &ptable.proc[NPROC]; ptemp++){
         if(ptemp->state != RUNNABLE ||  ptemp->prior_val >= pmost->prior_val )
         continue;
         pmost = ptemp;
       }
 
       //increment priority for waiting functions
-      for(ptemp = ptable.proc; ptemp < &ptable.proc[NPROC]; ptemp++){
+      /* for(ptemp = ptable.proc; ptemp < &ptable.proc[NPROC]; ptemp++){
         if(ptemp->state != RUNNABLE || ptemp == pmost)
         continue;
         if(ptemp->state == RUNNABLE && ptemp->prior_val > 0)
           ptemp->prior_val --;
       } */
 
-      for(ptemp = ptable.proc; ptemp < &ptable.proc[NPROC]; ptemp++){
+      /* for(ptemp = ptable.proc; ptemp < &ptable.proc[NPROC]; ptemp++){
         if(ptemp->state != RUNNABLE)
         continue;
         if(ptemp->prior_val < pmost->prior_val) {
@@ -389,7 +389,7 @@ scheduler(void)
         /* if(ptemp->prior_val > 0) {
           ptemp->prior_val--;
         } */
-      }
+      } */
 
       // Switch to chosen process.  It is the process's job
       // to release ptable.lock and then reacquire it
