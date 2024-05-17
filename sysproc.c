@@ -42,11 +42,11 @@ sys_getpid(void)
   return myproc()->pid;
 }
 
-/* int
+int
 sys_getpriority(void) 
 {
   return myproc()->prior_val;
-} */
+}
 
 int
 sys_sbrk(void)
