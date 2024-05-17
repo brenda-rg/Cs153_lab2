@@ -281,6 +281,7 @@ int wait(void)
   struct proc *p;
   int havekids, pid;
   struct proc *curproc = myproc();
+  int original_priority = curproc->prior_val;  // Save the original priority of the parent
 
   acquire(&ptable.lock);
   for(;;){
@@ -306,12 +307,12 @@ int wait(void)
       }
       // Check priority donation condition
       if (p->prior_val > curproc->prior_val) {
-        p->original_prior_val = p->prior_val; // Save original priority
-        p->prior_val = curproc->prior_val; // Donate priority
+        curproc->prior_val = p->prior_val; // Donate priority
       }
     }
     // No point waiting if no children
     if(!havekids || curproc->killed){
+      curproc->prior_val = original_priority; // Restore the parent's original priority
       release(&ptable.lock);
       return -1;
     }
