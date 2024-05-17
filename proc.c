@@ -369,11 +369,12 @@ scheduler(void)
         if(ptemp->state != RUNNABLE || ptemp->prior_val >= pmost->prior_val)
         continue;
         pmost = ptemp;
+        //cprintf("current priority of child %d: %d\n", ptemp->pid, ptemp->prior_val);
       }
       p = pmost;
       //increase priority for waiting functions 
       for(ptemp = ptable.proc; ptemp < &ptable.proc[NPROC]; ptemp++){
-        if(ptemp->state != RUNNABLE || ptemp == pmost)
+        if(ptemp->state != RUNNABLE || ptemp == p)
         continue;
         if(ptemp->prior_val > 0) {
           (ptemp->prior_val)--;
@@ -386,7 +387,7 @@ scheduler(void)
       // before jumping back to us.
       c->proc = p;
       switchuvm(p);
-      //pmost->T_burst ++;
+      //p->T_burst ++;
       p->state = RUNNING;
       swtch(&(c->scheduler), p->context);
       switchkvm();
