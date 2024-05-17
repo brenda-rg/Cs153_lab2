@@ -223,52 +223,6 @@ fork(void)
   return pid;
 }
 
-// Exit the current process.  Does not return.
-// An exited process remains in the zombie state
-// until its parent calls wait() to find out it exited.
-/* void
-exit(void)
-{
-  struct proc *curproc = myproc();
-  struct proc *p;
-  int fd;
-
-  if(curproc == initproc)
-    panic("init exiting");
-
-  // Close all open files.
-  for(fd = 0; fd < NOFILE; fd++){
-    if(curproc->ofile[fd]){
-      fileclose(curproc->ofile[fd]);
-      curproc->ofile[fd] = 0;
-    }
-  }
-
-  begin_op();
-  iput(curproc->cwd);
-  end_op();
-  curproc->cwd = 0;
-
-  acquire(&ptable.lock);
-
-  // Parent might be sleeping in wait().
-  wakeup1(curproc->parent);
-
-  // Pass abandoned children to init.
-  for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
-    if(p->parent == curproc){
-      p->parent = initproc;
-      if(p->state == ZOMBIE)
-        wakeup1(initproc);
-    }
-  }
-
-  // Jump into the scheduler, never to return.
-  curproc->state = ZOMBIE;
-  sched();
-  panic("zombie exit");
-} */
-
 //edited exit
 void
 exit(void)
@@ -277,16 +231,7 @@ exit(void)
   struct proc *p;
   int fd;
 
-  curproc->T_finish = ticks; //get end time of process
-  int turnaround_time = curproc->T_finish - curproc->T_start; //calculate turnaround time before exiting
-  int waiting_time = turnaround_time - curproc->T_burst;
-
-  //debug
-  cprintf("Starting time: %d\n", curproc->T_start);
-  cprintf("Exiting time:  %d\n", curproc->T_finish);
-  cprintf("Burst time: %d\n", curproc->T_burst);
-  cprintf("Turnaround time:  %d\n", turnaround_time);
-  cprintf("waiting time: %d\n", waiting_time);
+ 
 
   if(curproc == initproc)
     panic("init exiting");
@@ -303,6 +248,17 @@ exit(void)
   iput(curproc->cwd);
   end_op();
   curproc->cwd = 0;
+  /* curproc->T_finish = ticks; //get end time of process
+  int turnaround_time = curproc->T_finish - curproc->T_start; //calculate turnaround time of process
+  int waiting_time = turnaround_time - curproc->T_burst; // waiting time of process */
+
+  //debug & print statements
+  //cprintf("Starting time: %d\n", curproc->T_start);
+  //cprintf("Exiting time:  %d\n", curproc->T_finish);
+  //cprintf("Burst time: %d\n", curproc->T_burst);
+  /* cprintf("Turnaround time:  %d\n", turnaround_time);
+  cprintf("waiting time: %d\n", waiting_time); */
+  //cprintf("priority value: %d\n", curproc->prior_val);
 
   acquire(&ptable.lock);
 
@@ -331,6 +287,7 @@ wait(void)
 {
   struct proc *p;
   int havekids, pid;
+  //int ptemp;
   struct proc *curproc = myproc();
   
   acquire(&ptable.lock);
@@ -341,6 +298,17 @@ wait(void)
       if(p->parent != curproc)
         continue;
       havekids = 1;
+
+      /* //priority donation
+      if((p->prior_val > curproc->prior_val) && p->state == RUNNABLE) {//priority donation
+      ptemp = p->prior_val;
+      //cprintf("Parent waiting on child %d with priority of %d:\n", p->pid, p->prior_val);
+      p->prior_val = p->parent->prior_val;
+      curproc->prior_val = ptemp;
+      //cprintf("Parent has donated child %d with priority of %d:\n", p->pid, p->prior_val);
+      //cprintf("Parent now has priority of %d:\n", p->parent->prior_val);
+      } */
+
       if(p->state == ZOMBIE){
         // Found one.
         pid = p->pid;
@@ -398,19 +366,29 @@ scheduler(void)
       
       pmost = p;
       //find process with highest priority (closest to 0)
-      for(ptemp = ptable.proc; ptemp < &ptable.proc[NPROC]; ptemp++){
+      /* for(ptemp = ptable.proc; ptemp < &ptable.proc[NPROC]; ptemp++){
         if(ptemp->state != RUNNABLE ||  ptemp->prior_val >= pmost->prior_val )
         continue;
         pmost = ptemp;
-        pmost->T_burst ++;
       }
 
       //increment priority for waiting functions
       for(ptemp = ptable.proc; ptemp < &ptable.proc[NPROC]; ptemp++){
-        if((ptemp->state != RUNNABLE && ptemp->state != SLEEPING) || ptemp == pmost)
+        if(ptemp->state != RUNNABLE || ptemp == pmost)
         continue;
         if(ptemp->state == RUNNABLE && ptemp->prior_val > 0)
           ptemp->prior_val --;
+      } */
+
+      for(ptemp = ptable.proc; ptemp < &ptable.proc[NPROC]; ptemp++){
+        if(ptemp->state != RUNNABLE)
+        continue;
+        if(ptemp->prior_val < pmost->prior_val) {
+        pmost = ptemp;
+        }
+        /* if(ptemp->prior_val > 0) {
+          ptemp->prior_val--;
+        } */
       }
 
       // Switch to chosen process.  It is the process's job
@@ -418,16 +396,14 @@ scheduler(void)
       // before jumping back to us.
       c->proc = pmost;
       switchuvm(pmost);
+      //pmost->T_burst ++;
       pmost->state = RUNNING;
-
       swtch(&(c->scheduler), pmost->context);
       switchkvm();
-
       //when a process runs decrease the priority
-      if (pmost->prior_val < 31) {
-          pmost->prior_val++;
-      }
-
+      /* if (pmost->prior_val < 31) {
+        pmost->prior_val++;
+      } */
       // Process is done running for now.
       // It should have changed its p->state before coming back.
       c->proc = 0;
