@@ -105,6 +105,9 @@ extern int sys_write(void);
 extern int sys_uptime(void);
 extern int sys_setpriority(void);
 extern int sys_getpriority(void);
+extern int sys_getburst(void);
+/* extern int sys_getturnaround(void);
+extern int sys_getwaiting(void); */
 
 static int (*syscalls[])(void) = {
 [SYS_fork]    sys_fork,
@@ -130,6 +133,9 @@ static int (*syscalls[])(void) = {
 [SYS_close]   sys_close,
 [SYS_setpriority] sys_setpriority,
 [SYS_getpriority] sys_getpriority,
+[SYS_getburst] sys_getburst,
+/* [SYS_getturnaround] sys_getturnaround,
+[SYS_getwaiting] sys_getwaiting, */
 };
 
 void

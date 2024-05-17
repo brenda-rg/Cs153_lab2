@@ -31,3 +31,5 @@ SYSCALL(sleep)
 SYSCALL(uptime)
 SYSCALL(setpriority)
 SYSCALL(getpriority)
+SYSCALL(getburst)
+

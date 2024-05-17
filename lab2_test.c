@@ -95,7 +95,9 @@ int PScheduler2(void){
                     asm("nop"); 
                 }
             }
-            printf(1, " - Child #%d with ending priority %d has finished! \n", getpid(), getpriority());		
+            printf(1, "------------------------------------------\n");
+            printf(1, " - Child #%d with starting priority %d has finished! \n", getpid(), 30-10*i);
+            printf(1, " - Child#%d Ending priority: %d\n - Burst time: %d\n", getpid(), getpriority(), getburst());
             exit();
         } else {
             printf(2," \n Error fork() \n");
@@ -108,7 +110,10 @@ int PScheduler2(void){
             ret_pid = wait();
             printf(1, " - This is the parent: child with PID# %d has finished\n", ret_pid);
         }
-        printf(1, " - If processes with highest priority finished first then its correct. \n");
+        printf(1, "------------------------------------------\n");
+        printf(1, " - The burst time, turnaround time, and waiting time are displayed. \n");
+        printf(1, " - Parent#%d Ending priority: %d\n - Burst time: %d\n", getpid(), getpriority(), getburst());
+
     }
 			
     return 0;

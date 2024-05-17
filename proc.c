@@ -248,16 +248,18 @@ exit(void)
   iput(curproc->cwd);
   end_op();
   curproc->cwd = 0;
+  acquire(&tickslock);
   curproc->T_finish = ticks; //get end time of process
-  int turnaround_time = curproc->T_finish - curproc->T_start; //calculate turnaround time of process
-  int waiting_time = turnaround_time - curproc->T_burst; // waiting time of process
+  release(&tickslock);
+  curproc->turnaround = curproc->T_finish - curproc->T_start; //calculate turnaround time of process
+  curproc->waiting = curproc->turnaround - curproc->T_burst; // waiting time of process
 
   //debug & print statements
   //cprintf("Starting time: %d\n", curproc->T_start);
   //cprintf("Exiting time:  %d\n", curproc->T_finish);
   //cprintf("Burst time: %d\n", curproc->T_burst);
-  cprintf("Turnaround time:  %d\n", turnaround_time);
-  cprintf("waiting time: %d\n", waiting_time);
+
+  cprintf(" - Turnaround time:  %d\n - Waiting time: %d\n", curproc->turnaround, curproc->waiting);
   //cprintf("priority value: %d\n", curproc->prior_val);
 
   acquire(&ptable.lock);
@@ -386,12 +388,19 @@ scheduler(void)
       // to release ptable.lock and then reacquire it
       // before jumping back to us.
       c->proc = p;
+      acquire(&tickslock);
+      p->c_start = ticks;
+      release(&tickslock);
       switchuvm(p);
       p->state = RUNNING;
-      p->T_burst ++;
+      //p->T_burst ++;
       swtch(&(c->scheduler), p->context);
       //p->T_burst ++;
       switchkvm();
+      acquire(&tickslock);
+      p->c_end = ticks;
+      release(&tickslock);
+      p->T_burst += (p->c_end-p->c_start);
       //p->T_burst ++;
       //when a process runs decrease the priority
       if (p->prior_val < 31) {  //aging

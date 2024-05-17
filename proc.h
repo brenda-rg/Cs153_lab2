@@ -53,6 +53,10 @@ struct proc {
   int T_start;                 // Beginning of a process
   int T_finish;                // End of a process
   int T_burst;                 // Burst time of a process
+  int c_start;                 //cycle start (temp var)
+  int c_end;                   //cycle end
+  int turnaround;
+  int waiting;
 };
 
 // Process memory is laid out contiguously, low addresses first:
