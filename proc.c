@@ -387,10 +387,12 @@ scheduler(void)
       // before jumping back to us.
       c->proc = p;
       switchuvm(p);
-      p->T_burst ++;
       p->state = RUNNING;
+      p->T_burst ++;
       swtch(&(c->scheduler), p->context);
+      //p->T_burst ++;
       switchkvm();
+      //p->T_burst ++;
       //when a process runs decrease the priority
       if (p->prior_val < 31) {  //aging
         p->prior_val++;
