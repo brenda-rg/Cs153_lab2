@@ -386,7 +386,7 @@ scheduler(void)
       c->proc = p;
       switchuvm(p);
       //pmost->T_burst ++;
-      pmost->state = RUNNING;
+      p->state = RUNNING;
       swtch(&(c->scheduler), p->context);
       switchkvm();
       //when a process runs decrease the priority
