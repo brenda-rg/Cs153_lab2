@@ -363,13 +363,11 @@ scheduler(void)
     for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
       if(p->state != RUNNABLE)
         continue;
-      
       pmost = p;
       //find process with highest priority (closest to 0)
       for(ptemp = ptable.proc; ptemp < &ptable.proc[NPROC]; ptemp++){
-        if(ptemp->state != RUNNABLE)
+        if(ptemp->state != RUNNABLE || ptemp->prior_val >= pmost->prior_val)
         continue;
-        if(ptemp->prior_val < pmost->prior_val)
         pmost = ptemp;
       }
 
