@@ -48,6 +48,10 @@ sys_getpriority(void)
   return myproc()->prior_val;
 }
 
+int sys_getburst(void) {
+  return myproc()->T_burst;
+}
+
 int
 sys_sbrk(void)
 {
